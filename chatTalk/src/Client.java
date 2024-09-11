@@ -5,18 +5,20 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Client {
-    // Field
-    Socket clientSocket;
-    BufferedReader input;
-    BufferedReader keyboard;
-    PrintWriter output;
-    String message;
+    // 0. Field
+    private Socket clientSocket;
+    private BufferedReader input;
+    private BufferedReader keyboard;
+    private PrintWriter output;
+    private ClientInfo clientInfo;
 
+    // 1. Construct
     public Client() {
         makeClientSocket("localhost",12345);
     }
 
-    private void makeClientSocket(String host,int port) {
+    // 2. Method
+    private void makeClientSocket(String host, int port) {
         if(clientSocket == null) {
             try {
                 clientSocket = new Socket(host, port);
@@ -31,18 +33,18 @@ public class Client {
 
     private void handleUserInput() {
         try {
+            String message = "";
             while ((message = keyboard.readLine()) != null) {
-                output.println(message);         // 사용자 입력을 서버로 전송
-                System.out.println(input.readLine()); // 서버로부터 응답을 읽고 출력
+                this.output.println(message);              // 사용자 입력을 서버로 전송
+                System.out.println(this.input.readLine()); // 서버로부터 응답을 읽고 출력
             }
         } catch (IOException e) {
             System.out.println("입출력 중 오류 발생: " + e.getMessage());
         } finally {
-            // 리소스 정리
             try {
-                if (keyboard != null) keyboard.close();
-                if (output != null) output.close();
-                if (input != null) input.close();
+                if (this.keyboard != null) this.keyboard.close();
+                if (this.output != null) this.output.close();
+                if (this.input != null) this.input.close();
             } catch (IOException e) {
                 System.out.println("리소스 닫기 중 오류 발생: " + e.getMessage());
             }
@@ -51,18 +53,26 @@ public class Client {
 
     public void start() {
         try {
-            input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            keyboard = new BufferedReader(new InputStreamReader(System.in));
-            output = new PrintWriter(clientSocket.getOutputStream(), true);
+            // ID 지정
+            this.input = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
+            this.keyboard = new BufferedReader(new InputStreamReader(System.in));
+            this.output = new PrintWriter(this.clientSocket.getOutputStream(), true);
+
+            //System.out.println(this.input.readLine());
+
+            //clientInfo = new ClientInfo();
+            //clientInfo.setId(this.keyboard.readLine());
+            //this.output.println(clientInfo.getId());
+            //System.out.println("UserId : " + clientInfo.getId());
 
             handleUserInput();
         } catch (IOException e) {
             System.out.println("입출력 중 오류 발생: " + e.getMessage());
         } finally {
             try {
-                if (keyboard != null) keyboard.close();
-                if (output != null) output.close();
-                if (input != null) input.close();
+                if (this.keyboard != null) this.keyboard.close();
+                if (this.output != null) this.output.close();
+                if (this.input != null) this.input.close();
             } catch (IOException e) {
                 System.out.println("리소스 닫기 중 오류 발생: " + e.getMessage());
             }

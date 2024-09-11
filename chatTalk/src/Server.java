@@ -3,11 +3,8 @@ import java.net.*;
 
 
 public class Server {
-    ServerSocket serverSocket;
-    Socket clientSocket;
-    BufferedReader input;
-    PrintWriter output;
-    String message;
+    private ServerSocket serverSocket;
+    private ClientMap clientMap;
 
     // Default Constructor
     public Server() {
@@ -19,6 +16,8 @@ public class Server {
         if(serverSocket == null) {
             try {
                 serverSocket = new ServerSocket(port);
+                clientMap = new ClientMap(port);
+
                 System.out.println("서버 소켓이 포트 " + port + "에서 열렸습니다.");
             } catch(IOException e) {
                 System.out.println("서버 소켓 생성 중 오류 발생: " + e.getMessage());
@@ -28,34 +27,16 @@ public class Server {
         }
     }
 
-    // 클라이언트로부터 메시지 처리
-    private void handleClientMessages() throws IOException {
-        while ((message = input.readLine()) != null) {
-            System.out.println("Client: " + message);
-            output.println("Server: " + message);
-        }
-    }
-
     public void start() {
-        try {
-            clientSocket = serverSocket.accept();
-            System.out.println("클라이언트와 연결이 되었습니다.");
-
-            input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            output = new PrintWriter(clientSocket.getOutputStream(), true);
-
-            handleClientMessages();
-        } catch(IOException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            // 리소스 정리
+        while(true) {
             try {
-                if (input != null) input.close();
-                if (output != null) output.close();
-                if (clientSocket != null) clientSocket.close();
-                if (serverSocket != null) serverSocket.close();
-            } catch (IOException e) {
-                System.out.println("리소스 닫기 중 오류 발생: " + e.getMessage());
+                Socket clientSocket = serverSocket.accept();
+
+                ClientHandler clientHandler = new ClientHandler(clientSocket, this.clientMap);
+                clientMap.addClient("111", clientHandler);
+                clientHandler.start();
+            } catch(IOException e) {
+
             }
         }
     }
